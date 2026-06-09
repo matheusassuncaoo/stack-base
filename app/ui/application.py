@@ -1,85 +1,168 @@
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal, Vertical
-from textual.widgets import Footer, Header, Label, ListItem, ListView, Static
+from textual.binding import Binding
+from textual.containers import Center, Container, Vertical
+from textual.widgets import Footer, Label, OptionList, Static
+from textual.widgets.option_list import Option
 
 
-class StackBaseApp(App):
+STACK_BASE_LOGO = r"""
+ ███████╗████████╗ █████╗  ██████╗██╗  ██╗
+ ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
+ ███████╗   ██║   ███████║██║     █████╔╝
+ ╚════██║   ██║   ██╔══██║██║     ██╔═██╗
+ ███████║   ██║   ██║  ██║╚██████╗██║  ██╗
+ ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
+
+ ██████╗  █████╗ ███████╗███████╗
+ ██╔══██╗██╔══██╗██╔════╝██╔════╝
+ ██████╔╝███████║███████╗█████╗
+ ██╔══██╗██╔══██║╚════██║██╔══╝
+ ██████╔╝██║  ██║███████║███████╗
+ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝
+"""
+
+
+class StackBaseApp(App[None]):
     """Aplicação principal do Stack Base."""
 
     TITLE = "Stack Base"
-    SUB_TITLE = "Project scaffolding and architecture standardization"
+    SUB_TITLE = "Project Scaffolding"
 
     CSS_PATH = "stack_base.tcss"
 
     BINDINGS = [
-        ("q", "quit", "Sair"),
-        ("c", "create_project", "Criar projeto"),
-        ("t", "show_templates", "Templates"),
+        Binding("q", "quit", "Sair"),
+        Binding("escape", "quit", "Sair"),
     ]
 
     def compose(self) -> ComposeResult:
-        yield Header()
+        """Monta a tela inicial uma única vez."""
 
-        with Horizontal(id="main-layout"):
-            with Vertical(id="sidebar"):
-                yield Label("STACK BASE", id="brand")
+        with Container(id="application-shell"):
+            with Center(id="main-center"):
+                with Vertical(id="home-container"):
+                    yield Static(
+                        STACK_BASE_LOGO,
+                        id="logo",
+                    )
 
-                yield ListView(
-                    ListItem(Label("Criar projeto"), id="create-project"),
-                    ListItem(Label("Templates"), id="templates"),
-                    ListItem(Label("Validar projeto"), id="validate-project"),
-                    ListItem(Label("Configurações"), id="settings"),
-                    id="navigation",
-                )
+                    yield Label(
+                        "Gere e padronize projetos de software.",
+                        id="subtitle",
+                    )
 
-            with Vertical(id="content"):
-                yield Static(
-                    """
-[bold]Bem-vindo ao Stack Base[/bold]
+                    yield Label(
+                        "Selecione uma opção",
+                        id="menu-title",
+                    )
 
-Crie, configure e valide projetos de software
-utilizando estruturas padronizadas.
+                    yield OptionList(
+                        Option(
+                            "Criar novo projeto",
+                            id="create-project",
+                        ),
+                        Option(
+                            "Explorar templates",
+                            id="templates",
+                        ),
+                        Option(
+                            "Validar projeto existente",
+                            id="validate-project",
+                        ),
+                        Option(
+                            "Configurações",
+                            id="settings",
+                        ),
+                        Option(
+                            "Sobre o Stack Base",
+                            id="about",
+                        ),
+                        Option(
+                            "Sair",
+                            id="exit",
+                        ),
+                        id="main-menu",
+                    )
 
-[bold]Stack inicial[/bold]
-• Java
-• Spring Boot
-• MVC
-• Docker
-• Testes automatizados
-
-Selecione uma opção no menu lateral.
-                    """,
-                    id="welcome",
-                    markup=True,
-                )
-
-                yield Static(
-                    """
-[bold]Próximo projeto[/bold]
-
-Nome: ainda não definido
-Template: java-spring
-Arquitetura: MVC
-Status: aguardando configuração
-                    """,
-                    id="project-summary",
-                    markup=True,
-                )
+                    yield Static(
+                        "↑/↓ navegar    Enter selecionar    Q sair",
+                        id="navigation-help",
+                    )
 
         yield Footer()
 
+    def on_mount(self) -> None:
+        """Coloca o foco no menu principal."""
+
+        menu = self.query_one("#main-menu", OptionList)
+        menu.focus()
+
+    def on_option_list_option_selected(
+        self,
+        event: OptionList.OptionSelected,
+    ) -> None:
+        """Executa a opção confirmada pelo usuário."""
+
+        option_id = event.option.id
+
+        if option_id == "create-project":
+            self.action_create_project()
+            return
+
+        if option_id == "templates":
+            self.action_templates()
+            return
+
+        if option_id == "validate-project":
+            self.action_validate_project()
+            return
+
+        if option_id == "settings":
+            self.action_settings()
+            return
+
+        if option_id == "about":
+            self.action_about()
+            return
+
+        if option_id == "exit":
+            self.exit()
+
     def action_create_project(self) -> None:
         self.notify(
-            "A tela de criação será aberta.",
-            title="Stack Base",
+            "A tela de criação será implementada em seguida.",
+            title="Criar projeto",
         )
 
-    def action_show_templates(self) -> None:
+    def action_templates(self) -> None:
         self.notify(
-            "Abrindo catálogo de templates.",
-            title="Stack Base",
+            "O catálogo de templates será aberto aqui.",
+            title="Templates",
+        )
+
+    def action_validate_project(self) -> None:
+        self.notify(
+            "O validador de projetos será aberto aqui.",
+            title="Validação",
+        )
+
+    def action_settings(self) -> None:
+        self.notify(
+            "As configurações serão abertas aqui.",
+            title="Configurações",
+        )
+
+    def action_about(self) -> None:
+        self.notify(
+            (
+                "Stack Base 0.1.0 — ferramenta para geração "
+                "e padronização de projetos."
+            ),
+            title="Sobre",
         )
 
 
 def run() -> None:
+    """Executa a interface do Stack Base."""
+
     StackBaseApp().run()

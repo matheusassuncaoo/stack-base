@@ -1,77 +1,142 @@
 Screen {
-    background: #0d1117;
-    color: #e6edf3;
+    background: #09090b;
+    color: #e4e4e7;
+    overflow: hidden;
 }
 
-Header {
-    background: #161b22;
-    color: #ffffff;
+#application-shell {
+    width: 100%;
+    height: 100%;
 }
 
-Footer {
-    background: #161b22;
-}
-
-#main-layout {
+#main-center {
+    width: 100%;
     height: 1fr;
+    align: center middle;
+    overflow-y: auto;
 }
 
-#sidebar {
-    width: 30;
-    min-width: 24;
-    background: #161b22;
-    border-right: solid #30363d;
+#home-container {
+    width: 72%;
+    min-width: 52;
+    max-width: 96;
+    height: auto;
+    padding: 1 3;
+}
+
+#logo {
+    width: 100%;
+    height: auto;
+    color: #7dd3fc;
+    text-style: bold;
+    text-align: center;
+}
+
+#subtitle {
+    width: 100%;
+    height: auto;
+    margin-top: 1;
+    color: #a1a1aa;
+    text-align: center;
+}
+
+#menu-title {
+    width: 100%;
+    height: auto;
+    margin-top: 2;
+    margin-bottom: 1;
+    color: #fafafa;
+    text-style: bold;
+}
+
+#main-menu {
+    width: 100%;
+    height: 14;
+    background: #111113;
+    border: round #27272a;
     padding: 1;
 }
 
-#brand {
-    height: 3;
-    content-align: center middle;
+#main-menu > .option-list--option {
+    height: 2;
+    padding: 0 2;
+    color: #a1a1aa;
+}
+
+#main-menu > .option-list--option-highlighted {
+    background: #1e3a5f;
+    color: #e0f2fe;
     text-style: bold;
-    color: #58a6ff;
-    border-bottom: solid #30363d;
-    margin-bottom: 1;
 }
 
-#navigation {
-    height: 1fr;
-    background: transparent;
-    border: none;
-}
-
-#navigation ListItem {
-    height: 3;
-    padding: 0 1;
-}
-
-#navigation ListItem:hover {
-    background: #21262d;
-}
-
-#navigation ListItem.--highlight {
-    background: #1f6feb;
-    color: #ffffff;
-}
-
-#content {
-    width: 1fr;
-    padding: 2 3;
-}
-
-#welcome {
-    width: 1fr;
-    height: auto;
-    min-height: 14;
-    padding: 2;
-    border: round #30363d;
-    background: #161b22;
-}
-
-#project-summary {
-    width: 1fr;
+#navigation-help {
+    width: 100%;
     height: auto;
     margin-top: 1;
-    padding: 2;
-    border: round #30363d;
-    background: #161b22;
+    color: #71717a;
+    text-align: center;
+}
+
+Footer {
+    height: 1;
+    background: #111113;
+    color: #a1a1aa;
+}
+
+
+/* Terminal médio */
+
+Screen.-medium #home-container {
+    width: 88%;
+    min-width: 44;
+    padding: 1 2;
+}
+
+Screen.-medium #logo {
+    display: none;
+}
+
+Screen.-medium #subtitle {
+    color: #7dd3fc;
+    text-style: bold;
+}
+
+Screen.-medium #menu-title {
+    margin-top: 1;
+}
+
+
+/* Terminal pequeno */
+
+Screen.-small #home-container {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 1;
+}
+
+Screen.-small #logo {
+    display: none;
+}
+
+Screen.-small #subtitle {
+    width: 100%;
+    margin-top: 0;
+    color: #7dd3fc;
+    text-style: bold;
+}
+
+Screen.-small #menu-title {
+    margin-top: 1;
+}
+
+Screen.-small #main-menu {
+    width: 100%;
+    height: 14;
+    border: none;
+    padding: 0;
+}
+
+Screen.-small #navigation-help {
+    display: none;
 }
