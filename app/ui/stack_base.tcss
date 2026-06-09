@@ -1,0 +1,77 @@
+Screen {
+    background: #0d1117;
+    color: #e6edf3;
+}
+
+Header {
+    background: #161b22;
+    color: #ffffff;
+}
+
+Footer {
+    background: #161b22;
+}
+
+#main-layout {
+    height: 1fr;
+}
+
+#sidebar {
+    width: 30;
+    min-width: 24;
+    background: #161b22;
+    border-right: solid #30363d;
+    padding: 1;
+}
+
+#brand {
+    height: 3;
+    content-align: center middle;
+    text-style: bold;
+    color: #58a6ff;
+    border-bottom: solid #30363d;
+    margin-bottom: 1;
+}
+
+#navigation {
+    height: 1fr;
+    background: transparent;
+    border: none;
+}
+
+#navigation ListItem {
+    height: 3;
+    padding: 0 1;
+}
+
+#navigation ListItem:hover {
+    background: #21262d;
+}
+
+#navigation ListItem.--highlight {
+    background: #1f6feb;
+    color: #ffffff;
+}
+
+#content {
+    width: 1fr;
+    padding: 2 3;
+}
+
+#welcome {
+    width: 1fr;
+    height: auto;
+    min-height: 14;
+    padding: 2;
+    border: round #30363d;
+    background: #161b22;
+}
+
+#project-summary {
+    width: 1fr;
+    height: auto;
+    margin-top: 1;
+    padding: 2;
+    border: round #30363d;
+    background: #161b22;
+}
