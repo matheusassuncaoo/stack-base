@@ -69,7 +69,6 @@ class StackBaseApp(App[None]):
             yield from self._compose_create_project()
             yield from self._compose_templates()
             yield from self._compose_validate_project()
-            yield from self._compose_devsecops()
             yield from self._compose_settings()
             yield from self._compose_about()
 
