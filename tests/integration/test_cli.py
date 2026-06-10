@@ -1,18 +1,36 @@
-from typer.testing import CliRunner
+import unittest
 
-runner = CliRunner()
+from textual.widgets import OptionList
 
-
-def test_version_command() -> None:
-    result = runner.invoke(app, ["version"])
-
-    assert result.exit_code == 0
-    assert "Stack Base" in result.stdout
-    assert "0.1.0" in result.stdout
+from app.ui.application import StackBaseApp
 
 
-def test_create_command() -> None:
-    result = runner.invoke(app, ["create", "meu-projeto"])
+class TestStackBaseApplication(unittest.IsolatedAsyncioTestCase):
+    async def test_application_starts_with_main_menu(self) -> None:
+        application = StackBaseApp()
 
-    assert result.exit_code == 0
-    assert "meu-projeto" in result.stdout
+        async with application.run_test(size=(120, 40)):
+            menu = application.query_one("#main-menu", OptionList)
+
+            self.assertIsNotNone(menu)
+            self.assertTrue(menu.has_focus)
+
+    async def test_application_has_six_menu_options(self) -> None:
+        application = StackBaseApp()
+
+        async with application.run_test(size=(120, 40)):
+            menu = application.query_one("#main-menu", OptionList)
+
+            self.assertEqual(menu.option_count, 6)
+
+    async def test_q_closes_application(self) -> None:
+        application = StackBaseApp()
+
+        async with application.run_test(size=(120, 40)) as pilot:
+            await pilot.press("q")
+
+        self.assertFalse(application.is_running)
+
+
+if __name__ == "__main__":
+    unittest.main()

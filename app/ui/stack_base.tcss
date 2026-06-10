@@ -1,42 +1,35 @@
 Screen {
-    background: #09090b;
-    color: #e4e4e7;
-    overflow: hidden;
+    background: #090707;
+    color: #f5eeee;
 }
 
-#application-shell {
+#screen-container {
     width: 100%;
     height: 100%;
-}
-
-#main-center {
-    width: 100%;
-    height: 1fr;
     align: center middle;
-    overflow-y: auto;
+    padding: 1;
 }
 
-#home-container {
-    width: 72%;
-    min-width: 52;
-    max-width: 96;
+#home {
+    width: 80%;
+    max-width: 78;
     height: auto;
-    padding: 1 3;
+    padding: 1 2;
 }
 
 #logo {
     width: 100%;
     height: auto;
-    color: #7dd3fc;
+    color: #dc143c;
     text-style: bold;
     text-align: center;
 }
 
-#subtitle {
+#description {
     width: 100%;
     height: auto;
     margin-top: 1;
-    color: #a1a1aa;
+    color: #c9b8bb;
     text-align: center;
 }
 
@@ -45,98 +38,34 @@ Screen {
     height: auto;
     margin-top: 2;
     margin-bottom: 1;
-    color: #fafafa;
+    color: #fff5f6;
     text-style: bold;
 }
 
 #main-menu {
     width: 100%;
     height: 14;
-    background: #111113;
-    border: round #27272a;
+    background: #140d0f;
+    border: round #53212b;
     padding: 1;
 }
 
 #main-menu > .option-list--option {
     height: 2;
     padding: 0 2;
-    color: #a1a1aa;
+    color: #d3c2c5;
 }
 
 #main-menu > .option-list--option-highlighted {
-    background: #1e3a5f;
-    color: #e0f2fe;
+    background: #761a2d;
+    color: #ffffff;
     text-style: bold;
 }
 
-#navigation-help {
+#help {
     width: 100%;
     height: auto;
     margin-top: 1;
-    color: #71717a;
+    color: #82686d;
     text-align: center;
-}
-
-Footer {
-    height: 1;
-    background: #111113;
-    color: #a1a1aa;
-}
-
-
-/* Terminal médio */
-
-Screen.-medium #home-container {
-    width: 88%;
-    min-width: 44;
-    padding: 1 2;
-}
-
-Screen.-medium #logo {
-    display: none;
-}
-
-Screen.-medium #subtitle {
-    color: #7dd3fc;
-    text-style: bold;
-}
-
-Screen.-medium #menu-title {
-    margin-top: 1;
-}
-
-
-/* Terminal pequeno */
-
-Screen.-small #home-container {
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    padding: 1;
-}
-
-Screen.-small #logo {
-    display: none;
-}
-
-Screen.-small #subtitle {
-    width: 100%;
-    margin-top: 0;
-    color: #7dd3fc;
-    text-style: bold;
-}
-
-Screen.-small #menu-title {
-    margin-top: 1;
-}
-
-Screen.-small #main-menu {
-    width: 100%;
-    height: 14;
-    border: none;
-    padding: 0;
-}
-
-Screen.-small #navigation-help {
-    display: none;
 }
