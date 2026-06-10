@@ -69,6 +69,7 @@ class StackBaseApp(App[None]):
             yield from self._compose_create_project()
             yield from self._compose_templates()
             yield from self._compose_validate_project()
+            yield from self._compose_validate_modal()
             yield from self._compose_settings()
             yield from self._compose_about()
 
@@ -133,6 +134,13 @@ class StackBaseApp(App[None]):
                 yield Button("Executar validação", id="run-validation", variant="primary")
                 yield Button("Voltar", id="back-home-validate")
             yield Static("", id="validation-result", classes="result-box")
+
+    def _compose_validate_modal(self) -> ComposeResult:
+        """Modal interno usado para exibir o resultado da validação sem abrir uma janela externa."""
+        with Vertical(id="validate-modal", classes="panel hidden"):
+            yield Label("Resultado da validação", classes="screen-title")
+            yield Static("", id="validate-modal-body", classes="result-box")
+            yield Button("Fechar", id="close-validate-modal")
 
     def _compose_settings(self) -> ComposeResult:
         with Vertical(id="settings-view", classes="panel hidden"):
@@ -212,6 +220,15 @@ Este MVP entrega uma TUI navegável, geração inicial de projetos e validação
 
         if button_id == "run-validation":
             self._validate_project()
+            return
+
+        if button_id == "close-validate-modal":
+            # Esconde o modal de validação
+            try:
+                self.query_one("#validate-modal", Vertical).display = False
+            except Exception:
+                pass
+            return
 
     def _generate_project(self) -> None:
         result = self.query_one("#create-result", Static)
@@ -244,10 +261,20 @@ Este MVP entrega uma TUI navegável, geração inicial de projetos e validação
         )
 
     def _validate_project(self) -> None:
-        result_widget = self.query_one("#validation-result", Static)
+        # Executa a detecção e exibe o resultado dentro de um modal interno na TUI
         path = self.query_one("#validate-path", Input).value.strip() or str(Path.cwd())
         detected_project = self.open_project_workflow.execute(path)
-        result_widget.update(self._format_detected_project(detected_project))
+        body = self._format_detected_project(detected_project)
+
+        # Preenche o conteúdo do modal e mostra-o
+        try:
+            self.query_one("#validate-modal-body", Static).update(body)
+            self.query_one("#validate-modal", Vertical).display = True
+            # Foca no botão fechar para acessibilidade/teclado
+            self.query_one("#close-validate-modal", Button).focus()
+        except Exception:
+            # Fallback: atualiza a área padrão se algo falhar
+            self.query_one("#validation-result", Static).update(body)
 
     def _select_value(self, selector: str, default: str) -> str:
         value = self.query_one(selector, Select).value

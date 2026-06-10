@@ -112,3 +112,17 @@ Button {
     color: #82686d;
     text-align: center;
 }
+
+/* Modal de validação - centralizado e destacado */
+.modal {
+    width: 80%;
+    max-width: 100;
+    background: rgba(20,13,15,0.98);
+    border: round #8a2a36;
+    padding: 1 2;
+}
+
+#validate-modal {
+    align: center middle;
+}
+

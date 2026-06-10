@@ -160,3 +160,5 @@ class ProjectDetector:
                     confidence=1.0 if has_test_directory and has_test_dependency else 0.8,
                 )
             )
+
+
