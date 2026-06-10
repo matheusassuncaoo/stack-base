@@ -31,6 +31,7 @@ python -m app.main
 * [Serviços, workflows e models](#serviços-workflows-e-models)
 * [Detecção de projetos](#detecção-de-projetos)
 * [Templates e presets](#templates-e-presets)
+* [DevSecOps e Oneflow](#devsecops-e-oneflow)
 * [Execução local](#execução-local)
 * [Testes](#testes)
 * [Common hurdles](#common-hurdles)
@@ -158,7 +159,10 @@ O projeto está em desenvolvimento.
 * estrutura para models;
 * documentação inicial;
 * diretório de templates;
-* diretório de presets.
+* diretório de presets;
+* documentação inicial de DevSecOps e Oneflow;
+* tela da TUI para consulta do fluxo de branches, tags e gates;
+* baseline de pipeline GitLab/GitHub gerado quando CI/CD é selecionado.
 
 ## Em desenvolvimento
 
@@ -171,6 +175,7 @@ O projeto está em desenvolvimento.
 * diagnóstico visual na TUI;
 * criação de projetos Java Spring;
 * validação arquitetural.
+* baseline DevSecOps com Oneflow, quality gates e rastreabilidade por tags.
 
 ## Ainda não implementado
 
@@ -1493,6 +1498,19 @@ Todo preset deve:
 * não conter segredos.
 
 ---
+
+# DevSecOps e Oneflow
+
+O Stack Base passa a tratar DevSecOps como uma capacidade transversal do projeto. O fluxo documentado em [`docs/devsecops-oneflow.md`](docs/devsecops-oneflow.md) define:
+
+* branches `main`, `develop` e `feat/<funcionalidade>`;
+* tags `dev-feat-*`, `dev-v*`, `hmg-v*-rc*` e `v*`;
+* integração por rebase e fast-forward merge;
+* quality gates de build, testes, análise estática, cobertura e code review;
+* security gates com SAST, dependency scan, Trivy, container scan e DAST com OWASP ZAP;
+* regra de rastreabilidade na qual a tag Git deve ser idêntica à tag da imagem do container implantado.
+
+Quando a opção de CI/CD é marcada na criação do projeto, o scaffold gerado inclui um baseline de pipeline e documentação local para orientar a evolução desse fluxo.
 
 # Execução local
 

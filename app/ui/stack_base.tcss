@@ -10,11 +10,15 @@ Screen {
     padding: 1;
 }
 
-#home {
-    width: 80%;
-    max-width: 78;
+.panel {
+    width: 86%;
+    max-width: 92;
     height: auto;
     padding: 1 2;
+}
+
+#home {
+    max-width: 78;
 }
 
 #logo {
@@ -33,18 +37,22 @@ Screen {
     text-align: center;
 }
 
-#menu-title {
+#menu-title, .screen-title {
     width: 100%;
     height: auto;
-    margin-top: 2;
+    margin-top: 1;
     margin-bottom: 1;
     color: #fff5f6;
     text-style: bold;
 }
 
+.screen-title {
+    color: #ff6b88;
+}
+
 #main-menu {
     width: 100%;
-    height: 14;
+    height: 16;
     background: #140d0f;
     border: round #53212b;
     padding: 1;
@@ -60,6 +68,41 @@ Screen {
     background: #761a2d;
     color: #ffffff;
     text-style: bold;
+}
+
+Input, Select {
+    width: 100%;
+    margin-bottom: 1;
+}
+
+.form-row {
+    height: 3;
+    width: 100%;
+}
+
+.form-row Select {
+    width: 1fr;
+    margin-right: 1;
+}
+
+.actions {
+    height: 3;
+    margin-top: 1;
+    margin-bottom: 1;
+}
+
+Button {
+    margin-right: 1;
+}
+
+.result-box, .table-box {
+    width: 100%;
+    height: auto;
+    min-height: 5;
+    padding: 1;
+    background: #140d0f;
+    border: round #53212b;
+    color: #eadfe1;
 }
 
 #help {
