@@ -10,6 +10,7 @@ from app.generator import ProjectGenerationError, ProjectGenerator
 from app.models.detect_project import DetectedProject, Technology
 from app.models.project_config import ProjectConfig
 from app.workflow.open_project_workflow import OpenProjectWorkflow
+from app.workflow.spring_mvc_workflow import SpringMvcWorkflow
 
 
 STACK_BASE_LOGO = r"""
@@ -60,6 +61,10 @@ class StackBaseApp(App[None]):
         super().__init__()
         self.generator = ProjectGenerator()
         self.open_project_workflow = OpenProjectWorkflow()
+        self.spring_mvc_workflow = SpringMvcWorkflow()
+        self._spring_mvc_plan = None
+        self._spring_mvc_action_index = 0
+        self._spring_mvc_log: list[str] = []
 
     def compose(self) -> ComposeResult:
         """Monta todos os painéis da TUI e exibe o início por padrão."""
@@ -69,6 +74,7 @@ class StackBaseApp(App[None]):
             yield from self._compose_create_project()
             yield from self._compose_templates()
             yield from self._compose_validate_project()
+            yield from self._compose_spring_mvc()
             yield from self._compose_validate_modal()
             yield from self._compose_settings()
             yield from self._compose_about()
@@ -82,12 +88,15 @@ class StackBaseApp(App[None]):
                 Option("Criar novo projeto", id="create-project"),
                 Option("Explorar templates", id="templates"),
                 Option("Validar projeto", id="validate-project"),
+                Option("Estruturar Spring MVC", id="spring-mvc"),
                 Option("Configurações", id="settings"),
                 Option("Sobre", id="about"),
                 Option("Sair", id="exit"),
                 id="main-menu",
             )
-            yield Static("↑ ↓ navegar   •   Enter selecionar   •   Esc voltar   •   Q sair", id="help")
+            yield Static(
+                "↑ ↓ navegar   •   Enter selecionar   •   Esc voltar   •   Q sair", id="help"
+            )
 
     def _compose_create_project(self) -> ComposeResult:
         with Vertical(id="create-view", classes="panel hidden"):
@@ -128,12 +137,34 @@ class StackBaseApp(App[None]):
     def _compose_validate_project(self) -> ComposeResult:
         with Vertical(id="validate-view", classes="panel hidden"):
             yield Label("Validar projeto existente", classes="screen-title")
-            yield Label("Informe um diretório para detectar Java, Spring, build tools, Docker e testes.")
+            yield Label(
+                "Informe um diretório para detectar Java, Spring, build tools, Docker e testes."
+            )
             yield Input(value=str(Path.cwd()), placeholder="Caminho do projeto", id="validate-path")
             with Horizontal(classes="actions"):
                 yield Button("Executar validação", id="run-validation", variant="primary")
                 yield Button("Voltar", id="back-home-validate")
             yield Static("", id="validation-result", classes="result-box")
+
+    def _compose_spring_mvc(self) -> ComposeResult:
+        with Vertical(id="spring-mvc-view", classes="panel hidden"):
+            yield Label("Estruturar Spring MVC", classes="screen-title")
+            yield Label(
+                "Escolha um projeto Spring Boot existente. O Stack Base valida, planeja e só aplica cada item após sua confirmação."
+            )
+            yield Input(
+                value=str(Path.cwd()),
+                placeholder="Caminho do projeto Spring Boot",
+                id="spring-mvc-path",
+            )
+            with Horizontal(classes="actions"):
+                yield Button("Analisar MVC", id="analyze-spring-mvc", variant="primary")
+                yield Button(
+                    "Aplicar próxima ação", id="apply-spring-mvc-action", variant="success"
+                )
+                yield Button("Negar próxima ação", id="skip-spring-mvc-action")
+                yield Button("Voltar", id="back-home-spring-mvc")
+            yield Static("", id="spring-mvc-result", classes="result-box")
 
     def _compose_validate_modal(self) -> ComposeResult:
         """Modal interno usado para exibir o resultado da validação sem abrir uma janela externa."""
@@ -199,6 +230,7 @@ Este MVP entrega uma TUI navegável, geração inicial de projetos e validação
             "create-project": "create-view",
             "templates": "templates-view",
             "validate-project": "validate-view",
+            "spring-mvc": "spring-mvc-view",
             "settings": "settings-view",
             "about": "about-view",
         }
@@ -220,6 +252,18 @@ Este MVP entrega uma TUI navegável, geração inicial de projetos e validação
 
         if button_id == "run-validation":
             self._validate_project()
+            return
+
+        if button_id == "analyze-spring-mvc":
+            self._analyze_spring_mvc()
+            return
+
+        if button_id == "apply-spring-mvc-action":
+            self._handle_next_spring_mvc_action(approved=True)
+            return
+
+        if button_id == "skip-spring-mvc-action":
+            self._handle_next_spring_mvc_action(approved=False)
             return
 
         if button_id == "close-validate-modal":
@@ -275,6 +319,83 @@ Este MVP entrega uma TUI navegável, geração inicial de projetos e validação
         except Exception:
             # Fallback: atualiza a área padrão se algo falhar
             self.query_one("#validation-result", Static).update(body)
+
+    def _analyze_spring_mvc(self) -> None:
+        path = self.query_one("#spring-mvc-path", Input).value.strip() or str(Path.cwd())
+        self._spring_mvc_plan = self.spring_mvc_workflow.plan(path)
+        self._spring_mvc_action_index = 0
+        self._spring_mvc_log = []
+        self._render_spring_mvc_state()
+
+    def _handle_next_spring_mvc_action(self, approved: bool) -> None:
+        result = self.query_one("#spring-mvc-result", Static)
+
+        if self._spring_mvc_plan is None:
+            result.update("Analise um projeto Spring Boot antes de executar ações MVC.")
+            return
+
+        if self._spring_mvc_action_index >= len(self._spring_mvc_plan.actions):
+            self._render_spring_mvc_state()
+            return
+
+        action = self._spring_mvc_plan.actions[self._spring_mvc_action_index]
+        self._spring_mvc_action_index += 1
+
+        if approved:
+            action_result = self.spring_mvc_workflow.apply_action(
+                self._spring_mvc_plan.project_path,
+                action,
+            )
+            self._spring_mvc_log.append(f"✅ {action.relative_path}: {action_result.message}")
+        else:
+            self._spring_mvc_log.append(f"↩ {action.relative_path}: ação negada pelo usuário.")
+
+        self._render_spring_mvc_state()
+
+    def _render_spring_mvc_state(self) -> None:
+        result = self.query_one("#spring-mvc-result", Static)
+
+        if self._spring_mvc_plan is None:
+            result.update("")
+            return
+
+        plan = self._spring_mvc_plan
+        lines = [
+            f"Projeto: {plan.project_path}",
+            f"Pacote base: {plan.package_name}",
+            f"Diretório válido: {'sim' if plan.is_valid_project else 'não'}",
+            f"Spring Boot detectado: {'sim' if plan.is_spring_boot_project else 'não'}",
+            "",
+        ]
+
+        if plan.warnings:
+            lines.extend(["Avisos:", *[f"• {warning}" for warning in plan.warnings], ""])
+
+        if plan.actions:
+            lines.append("Ações MVC planejadas:")
+            for index, action in enumerate(plan.actions, start=1):
+                prefix = "→" if index - 1 == self._spring_mvc_action_index else " "
+                lines.append(f"{prefix} {index}. {action.description} ({action.relative_path})")
+        else:
+            lines.append("Nenhuma ação MVC pendente.")
+
+        if self._spring_mvc_action_index < len(plan.actions):
+            current_action = plan.actions[self._spring_mvc_action_index]
+            lines.extend(
+                [
+                    "",
+                    "Próxima decisão do usuário:",
+                    f"{current_action.description}",
+                    f"Destino: {current_action.relative_path}",
+                ]
+            )
+        elif plan.actions:
+            lines.extend(["", "Todas as ações planejadas foram confirmadas ou negadas."])
+
+        if self._spring_mvc_log:
+            lines.extend(["", "Histórico:", *self._spring_mvc_log])
+
+        result.update("\n".join(lines))
 
     def _select_value(self, selector: str, default: str) -> str:
         value = self.query_one(selector, Select).value

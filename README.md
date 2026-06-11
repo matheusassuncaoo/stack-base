@@ -170,7 +170,8 @@ O projeto está em desenvolvimento.
 * detecção de providers de banco;
 * diagnóstico visual na TUI;
 * criação de projetos Java Spring;
-* validação arquitetural.
+* validação arquitetural;
+* estruturação assistida de projetos Spring Boot no padrão MVC com confirmação por etapa.
 
 ## Ainda não implementado
 
@@ -302,6 +303,30 @@ ProjectValidator
 ValidationResult
         ↓
 Avisos, erros e conformidades
+```
+
+## Fluxo de estruturação Spring MVC
+
+```text
+Usuário escolhe um projeto Spring Boot existente
+        ↓
+Stack Base detecta se o diretório é realmente Java + Spring Boot
+        ↓
+Usuário seleciona a intenção MVC
+        ↓
+SpringMvcWorkflow monta um plano de ações não destrutivas
+        ↓
+TUI/CLI mostra uma ação por vez
+        ↓
+Usuário confirma ou nega cada criação
+        ↓
+Somente ações confirmadas são aplicadas
+```
+
+O fluxo também está disponível na CLI:
+
+```bash
+python -m app.main spring-mvc /caminho/do/projeto-spring
 ```
 
 ## Fluxo de criação
