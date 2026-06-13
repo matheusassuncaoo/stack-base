@@ -15,13 +15,13 @@ class TestStackBaseApplication(unittest.IsolatedAsyncioTestCase):
             self.assertIsNotNone(menu)
             self.assertTrue(menu.has_focus)
 
-    async def test_application_has_six_menu_options(self) -> None:
+    async def test_application_has_eight_menu_options(self) -> None:
         application = StackBaseApp()
 
         async with application.run_test(size=(120, 40)):
             menu = application.query_one("#main-menu", OptionList)
 
-            self.assertEqual(menu.option_count, 6)
+            self.assertEqual(menu.option_count, 8)
 
     async def test_q_closes_application(self) -> None:
         application = StackBaseApp()

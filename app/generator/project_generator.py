@@ -152,17 +152,32 @@ public class Application {
 
         (project_path / "pom.xml").write_text(
             f"""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<project xmlns=\"http://maven.apache.org/POM/4.0.0\">
+<project xmlns=\"http://maven.apache.org/POM/4.0.0\"
+         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.0</version>
+        <relativePath/>
+    </parent>
     <groupId>com.example</groupId>
     <artifactId>{config.name}</artifactId>
     <version>0.1.0</version>
     <properties>
         <java.version>21</java.version>
-        <spring-boot.version>3.3.0</spring-boot.version>
     </properties>
     <dependencies>{dependencies}
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 """,
             encoding="utf-8",
@@ -199,7 +214,7 @@ def health() -> dict[str, str]:
 name = "{config.name}"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = ["fastapi", "uvicorn"]
+dependencies = ["fastapi==0.115.6", "uvicorn==0.34.0"]
 """,
             encoding="utf-8",
         )
@@ -238,8 +253,14 @@ void bootstrap();
     "test": "jest"
   }},
   "dependencies": {{
-    "@nestjs/common": "latest",
-    "@nestjs/core": "latest"
+    "@nestjs/common": "^10.4.15",
+    "@nestjs/core": "^10.4.15",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  }},
+  "devDependencies": {{
+    "jest": "^29.7.0",
+    "@nestjs/cli": "^10.4.8"
   }}
 }}
 """,
@@ -270,7 +291,7 @@ CMD ["sh", "-c", "echo Stack Base project ready && sleep 1"]
         workflow_path = project_path / ".github" / "workflows"
         workflow_path.mkdir(parents=True)
         (workflow_path / "build.yml").write_text(
-            """name: build
+            """name: quality-gates
 
 on:
   push:
@@ -278,11 +299,98 @@ on:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate scaffold
-        run: test -f README.md
+        run: test -f README.md && test -f project-config.yaml
+      - name: Static security scan placeholder
+        run: echo "Run SAST, dependency scan and IaC scan in the platform pipeline"
+""",
+            encoding="utf-8",
+        )
+
+        (project_path / ".gitlab-ci.yml").write_text(
+            f"""stages:
+  - validate
+  - test
+  - security
+  - package
+
+variables:
+  ARTIFACT_TAG: "$CI_COMMIT_TAG"
+  IMAGE_NAME: "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+
+workflow:
+  rules:
+    - if: '$CI_MERGE_REQUEST_ID'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^feat\\//'
+    - if: '$CI_COMMIT_TAG =~ /^(dev-feat-.+-[0-9]+|dev-v[0-9]+\\.[0-9]+\\.[0-9]+|hmg-v[0-9]+\\.[0-9]+\\.[0-9]+-rc[0-9]+|v[0-9]+\\.[0-9]+\\.[0-9]+)$/'
+
+validate:scaffold:
+  stage: validate
+  image: alpine:3.20
+  script:
+    - test -f README.md
+    - test -f project-config.yaml
+    - test "$CI_COMMIT_BRANCH" = "develop" || echo "feature branches devem usar feat/<funcionalidade>"
+
+quality:unit-tests:
+  stage: test
+  image: alpine:3.20
+  script:
+    - echo "Execute build e testes unitários da stack {config.stack}"
+
+security:sast:
+  stage: security
+  image: alpine:3.20
+  script:
+    - echo "Execute SonarQube/SAST e valide coverage mínimo"
+
+security:trivy-fs:
+  stage: security
+  image: aquasec/trivy:0.58.1
+  script:
+    - trivy fs --exit-code 1 --severity HIGH,CRITICAL .
+
+package:tagged-artifact:
+  stage: package
+  image: alpine:3.20
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  script:
+    - echo "A tag do repositório deve ser idêntica à tag da imagem: $IMAGE_NAME"
+""",
+            encoding="utf-8",
+        )
+
+        docs_path = project_path / "docs"
+        docs_path.mkdir(exist_ok=True)
+        (docs_path / "devsecops-oneflow.md").write_text(
+            f"""# DevSecOps e Oneflow
+
+Este projeto foi gerado com um baseline de CI/CD orientado ao fluxo Oneflow.
+
+## Branches
+
+- `main`: produção.
+- `develop`: base de desenvolvimento e análise estática.
+- `feat/<funcionalidade>`: implementação de funcionalidades.
+
+## Tags
+
+- `dev-feat-{config.name}-1`: validação de feature.
+- `dev-v0.1.0`: pacote para desenvolvimento.
+- `hmg-v0.1.0-rc1`: candidata para homologação.
+- `v0.1.0`: produção.
+
+## Gates mínimos
+
+- Build e testes unitários.
+- Análise estática e cobertura.
+- SAST, dependency scan e container scan.
+- Code review antes do fast-forward para `develop`.
 """,
             encoding="utf-8",
         )

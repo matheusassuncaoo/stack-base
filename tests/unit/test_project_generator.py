@@ -26,6 +26,8 @@ class TestProjectGenerator(unittest.TestCase):
             self.assertTrue((project_path / "project-config.yaml").is_file())
             self.assertTrue((project_path / "Dockerfile").is_file())
             self.assertTrue((project_path / ".github/workflows/build.yml").is_file())
+            self.assertTrue((project_path / ".gitlab-ci.yml").is_file())
+            self.assertTrue((project_path / "docs/devsecops-oneflow.md").is_file())
             self.assertTrue((project_path / "src/demo_api/main.py").is_file())
             self.assertTrue((project_path / "tests/test_health.py").is_file())
 
